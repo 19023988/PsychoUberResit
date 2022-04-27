@@ -1,9 +1,13 @@
 import math
 import numpy
 import heapq
+from taxi import PsychoTaxi
+
+psy = PsychoTaxi
+#push
 
 # a data container for all pertinent information related to fares. (Should we
-# add an underway flag and require taxis to acknowledge collection to the dispatcher?)
+# add an underway flag and require taxis to acknowledge collection to the dispatcher?)..
 class FareEntry:
 
       def __init__(self, origin, dest, time, price=0, taxiIndex=-1):
@@ -135,6 +139,11 @@ class Dispatcher:
 
       # taxis register their bids for a fare using this mechanism
       def fareBid(self, origin, taxi):
+          avgBalance = sum(list(map(lambda taxi: taxi._account, self._taxis))) / len(self._taxis)
+          balance20 = (avgBalance * 0.2)
+          if taxi._account <= balance20:
+              return
+
           # rogue taxis (not known to the dispatcher) can't bid on fares
           if taxi in self._taxis:
              # everyone else bids on fares available
@@ -210,6 +219,8 @@ class Dispatcher:
            # a very simple approach here gives taxis at most 5 ticks to respond, which can
            # surely be improved upon.
           if self._parent.simTime-time > 5:
+             avgBalance = sum(list(map(lambda taxi: taxi._account, self._taxis))) / len(self._taxis)
+             balance20 = (avgBalance * 0.2)
              allocatedTaxi = -1
              winnerNode = None
              fareNode = self._parent.getNode(origin[0],origin[1])
@@ -219,11 +230,13 @@ class Dispatcher:
              # 3) that the taxi's location is 'on-grid': somewhere in the dispatcher's map
              # 4) that at least one valid taxi has actually bid on the fare
              if fareNode is not None:
+                 psychoTaxiIdx = -1
                  for taxiIdx in self._fareBoard[origin][destination][time].bidders:
                      if len(self._taxis) > taxiIdx:
                          bidderLoc = self._taxis[taxiIdx].currentLocation
                          bidderNode = self._parent.getNode(bidderLoc[0], bidderLoc[1])
                          if bidderNode is not None:
+
                              # ultimately the naive algorithm chosen is which taxi is the closest. This is patently unfair for several
                              # reasons, but does produce *a* winner.
                              AccountMin = 0
@@ -233,6 +246,8 @@ class Dispatcher:
                              DistanceMin = 0
                              DistanceMax = 0
 
+                             #print("test "+str(taxiIdx))
+
                              NoTaxiFares = len([fare for fare in self._taxis[allocatedTaxi]._availableFares.values() if
                                                 fare.allocated])
                              NoIndexFares = len(
@@ -240,6 +255,10 @@ class Dispatcher:
                              DistanceShorter = self._parent.distance2Node(bidderNode,
                                                                           fareNode) < self._parent.distance2Node(
                                  winnerNode, fareNode)
+
+                             if self._taxis[taxiIdx]._account < balance20:
+                                 AccountMin = self._taxis._account
+                                 psychoTaxiIdx = taxiIdx
 
                              if self._taxis[taxiIdx]._account < AccountMin:
                                  AccountMin = self._taxis[taxiIdx]._account
@@ -290,9 +309,12 @@ class Dispatcher:
                                          taxiDistanceSeverity * DistanceWeight) + (
                                                         taxiPassengerSeverity * PassengerWeight)
 
-                             if taxiSeverity > allocatedTaxiSeverity:
+                             if taxiSeverity > allocatedTaxiSeverity and taxiIdx != psychoTaxiIdx:
                                  allocatedTaxiSeverity = taxiSeverity
                                  allocatedTaxi = taxiIdx
+
+                             elif taxiIdx == psychoTaxiIdx:
+                                 print("Psycho Taxi Denied Fare!")
 
                  # and after all that, we still have to check that somebody won, because any of the other reasons to invalidate
                  # the auction may have occurred.

@@ -69,6 +69,8 @@ class Taxi:
           self._direction = -1
           self._nextLoc = None
           self._nextDirection = -1
+          self._income = 0
+          self._trips = 0
           # this contains a Fare (object) that the taxi has picked up. You use the functions pickupFare()
           # and dropOffFare() in a given Node to collect and deliver a fare
           self._passenger = None
@@ -302,6 +304,8 @@ class Taxi:
           # we just dropped off a fare and received payment, add it to the account
           elif msg == self.FARE_PAY:
              self._account += args['amount']
+             self._trips += 1
+             self._income += args["amount"]
              return
           # a fare cancelled before being collected, remove it from the list
           elif msg == self.FARE_CANCEL:
@@ -396,7 +400,7 @@ class Taxi:
           Worthwhile = PriceBetterThanCost and NotCurrentlyBooked 
           Bid = CloseEnough and Worthwhile
 
-          #CSPs I am considering
+          #CSPs
           LongestFareWaitTime = 0
           for fare in self._availableFares.items():
              if LongestFareWaitTime < (self._world._time - fare[0][0]):
@@ -411,7 +415,7 @@ class Taxi:
           trafficMultiplier = 1 - trafficProb
           CanAffordToDestination = TimeToDestination < self._account
 
-          # CSP to determine how important their current financial state is
+          # CSP to determine how important their current money state is..
           if CurrentMoney < 100:
             AccountSeverity = 1
           elif CurrentMoney < 200:

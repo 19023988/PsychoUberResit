@@ -9,7 +9,7 @@ import networld
 import taxi
 import dispatcher
 
-# create objects for RoboUber
+# create objects for RoboUber.
 
 # TODO
 # experiment with parameter settings. worldX and worldY should not need to be
@@ -158,6 +158,7 @@ streets = [strt0,strt1,strt2,strt3,strt4,strt4S,strt5,strt6,strt7,strt8,
 # create the dict of things we want to record
 outputValues = {'time': [], 'fares': {}, 'taxis': {}}
 
+psychoID = 0
 # RoboUber itself will be run as a separate thread for performance, so that screen
 # redraws aren't interfering with model updates.
 def runRoboUber(worldX,worldY,runTime,stop,junctions=None,streets=None,interpolate=False,outputValues=None,**args):
@@ -174,6 +175,7 @@ def runRoboUber(worldX,worldY,runTime,stop,junctions=None,streets=None,interpola
 
    # create some taxis
    print("Creating taxis")
+   global psychoID
    psychoID = round(4*numpy.random.random()-0.5)
    taxi0 = taxi.PsychoTaxi(world=svcArea,taxi_num=100,service_area=svcMap,start_point=(20,0)) if psychoID == 0 else taxi.Taxi(world=svcArea,taxi_num=100,service_area=svcMap,start_point=(20,0))
    taxi1 = taxi.PsychoTaxi(world=svcArea,taxi_num=101,service_area=svcMap,start_point=(49,10)) if psychoID == 1 else taxi.Taxi(world=svcArea,taxi_num=101,service_area=svcMap,start_point=(49,10))
@@ -181,7 +183,7 @@ def runRoboUber(worldX,worldY,runTime,stop,junctions=None,streets=None,interpola
    taxi3 = taxi.PsychoTaxi(world=svcArea,taxi_num=103,service_area=svcMap,start_point=(0,35)) if psychoID == 3 else taxi.Taxi(world=svcArea,taxi_num=103,service_area=svcMap,start_point=(0,35))
 
    taxis = [taxi0,taxi1,taxi2,taxi3]
-
+   print("Psycho is taxi "+str(psychoID))
    # and a dispatcher
    print("Adding a dispatcher")
    dispatcher0 = dispatcher.Dispatcher(parent=svcArea,taxis=taxis)
@@ -201,10 +203,20 @@ def runRoboUber(worldX,worldY,runTime,stop,junctions=None,streets=None,interpola
 
          # exit if 'q' has been pressed
          if stop.is_set():
-            threadRunTime = 0
+
+
+             for i,t in enumerate(taxis):
+               print("Taxi {0}: amount = {1}, total income = {2}, trips = {3}".format(i, t._account, t._income,t._trips))
+
+               #print ("Taxi made no money & no trip")
+               #print("Average payment per trip: {0}".format(t._income / t._trips))
+
+             threadRunTime = 0
          else: 
             svcArea.runWorld(ticks=1, outputs=outputValues)
             # print("Times: {0}, Fares: {1}, Taxis: {2}".format(outputValues['time'], outputValues['fares'].keys(), outputValues['taxis'].keys()))
+            #print("Fares dropped: {}".format(dispatcher0._cancellations))
+            print("Dispatcher revenue: {0}".format(dispatcher0._revenue))
             if threadTime != svcArea.simTime:
                threadTime += 1
             time.sleep(1)
@@ -384,6 +396,7 @@ while curTime < runTime:
 
              # advance the time                           
              curTime += 1
+
 
 
 

@@ -1,3 +1,5 @@
+
+#NOT USING HIGH VISUAL SCALE. PLEASE LOOK FOR PsychoUber.py
 import sys
 import pygame
 import threading
