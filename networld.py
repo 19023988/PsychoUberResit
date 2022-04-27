@@ -9,7 +9,7 @@ from taxi import Taxi
 # end up being a Node, a street will end up being an Edge.
 
 # a junctionDef contains:
-# 1) its (x,y) coordinates
+# 1) its (x,y) coordinates..
 # 2) how many taxis can occupy the junction
 # 3) whether a taxi is permitted to stop here
 # 4) a function to set the probability of a Fare appearing. This should be a

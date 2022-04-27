@@ -6,7 +6,7 @@ from taxi import PsychoTaxi
 psy = PsychoTaxi
 #push
 
-# a data container for all pertinent information related to fares. (Should we
+# a data container for all pertinent information related to fares. (Should we..
 # add an underway flag and require taxis to acknowledge collection to the dispatcher?)..
 class FareEntry:
 

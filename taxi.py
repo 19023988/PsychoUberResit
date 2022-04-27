@@ -480,7 +480,7 @@ class PsychoTaxi(Taxi):
              self._offDutyTime = self._world.simTime
           # have we reached our last known destination? Decide what to do now.
           if len(self._path) == 0:
-             # PsychoTaxi simply kills the passenger!
+             # PsychoTaxi simply kills the passenger!..
              if self._passenger is not None:
                 self._passenger.clear()           
                 self._passenger = None 
